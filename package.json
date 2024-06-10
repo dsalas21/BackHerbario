@@ -1,0 +1,17 @@
+
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "conexion_mysql.js",
+  "scripts": {
+    "start": "node conexion_mysql.js"
+  },
+  "dependencies": {
+    "mysql": "^2.18.1"
+  },
+  "author": "Diego",
+  "license": "ISC"
+}
+
+
+
