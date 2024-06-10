@@ -255,7 +255,7 @@ app.get("/Usuarios",(req,res)=>{
 );
 });
 
-
+/*
 connection.connect((err) => {
   if (err) {
     console.error('Error de conexión a la base de datos:', err);
@@ -270,7 +270,7 @@ app.listen(port, () => {
 });
 
 
-
+*/
 
 
 
