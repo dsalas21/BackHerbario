@@ -5,6 +5,7 @@ const app = express();
 const cors= require('cors');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
+var router = express.Router();
 const port =process.env.MYSQLPORT;
 
 const connection = mysql2.createPool({
@@ -26,7 +27,7 @@ app.use(express.json({ limit: '50mb' }));
 
 
 
-app.get('/Usuarios', async function(req, res, next) {
+router.get('/Usuarios', async function(req, res, next) {
   try {
     const [rows] = await connection.query("SELECT * FROM Usuarios");
     if (rows.length === 0) {
