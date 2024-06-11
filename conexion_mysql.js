@@ -1,11 +1,13 @@
-const mysql = require('mysql');
+const mysql2 = require('mysql2/promise');
 const express = require('express');
 const app = express();
 //const port=3001;
 const cors= require('cors');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
-const connection = mysql.createConnection({
+const port =process.env.MYSQLPORT;
+
+const connection = mysql2.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
@@ -14,47 +16,58 @@ const connection = mysql.createConnection({
  
 });
 
+
+
+
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+
+
+
+app.get('/Usuarios', async function(req, res, next) {
+  try {
+    const [rows] = await connection.query("SELECT * FROM Usuarios");
+    if (rows.length === 0) {
+      return res.status(204).json({ status: 204, message: "No items found" });
+    }
+    return res.status(200).json({ status: 200, data: rows });
+  } catch (err) {
+    return res.status(500).json({ status: 500, message: err.message });
+  }
+});
+
+
+
 //Registrar usuarios
-app.post('/create', (req, res) => {
+app.post('/create', async (req, res) => {
   const { name, email, password } = req.body;
 
-  // funcion para encriptar contraseña
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) {
-      res.status(500).send('Error al hashear la contraseña');
-      return;
-    }
+  try {
+    // Función para encriptar contraseña
+    const hash = await bcrypt.hash(password, 10);
 
-    connection.query(
+    const [result] = await connection.query(
       'INSERT INTO Usuarios (name, email, password) VALUES (?, ?, ?)',
-      [name, email, hash],
-    
-      (err, result) => {
-        if (err) {
-          res.status(500).send('Error al registrar el usuario');
-          return;
-        }
-
-        res.send('Usuario registrado exitosamente');
-      }
+      [name, email, hash]
     );
-  });
+
+    res.status(201).json({ status: 201, message: 'Usuario registrado exitosamente', data: result });
+  } catch (err) {
+    res.status(500).json({ status: 500, message: 'Error al registrar el usuario', error: err.message });
+  }
 });
+
 
 //Inicio de sesion
 
-app.post('/Login', (req, res) => {
+app.post('/Login', async (req, res) => {
   const { email, password } = req.body;
 
-  // busqueda del email
-  connection.query('SELECT * FROM Usuarios WHERE email = ?', [email], (err, results) => {
-    if (err) {
-      res.status(500).send('Error al buscar usuario');
-      return;
-    }
+  try {
+    // busqueda del email
+    const [results] = await connection.promise().query('SELECT * FROM Usuarios WHERE email = ?', [email]);
 
     if (results.length === 0) {
       res.status(401).send('Usuario no encontrado');
@@ -64,21 +77,18 @@ app.post('/Login', (req, res) => {
     const user = results[0];
 
     // comparacion de contra encriptada
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) {
-        res.status(500).send('Error al comparar contraseñas');
-        return;
-      }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(401).send('Contraseña incorrecta');
+      return;
+    }
 
-      if (!isMatch) {
-        res.status(401).send('Contraseña incorrecta');
-        return;
-      }
-
-      res.send('Inicio de sesión exitoso');
-    });
-  });
+    res.send('Inicio de sesión exitoso');
+  } catch (err) {
+    res.status(500).send('Error en el servidor');
+  }
 });
+
 
 
 
@@ -87,56 +97,54 @@ app.post('/Login', (req, res) => {
 //Registrar Recolectores
 
 
-app.post("/regR",(req,res)=>{
-  const name=req.body.name;
-  const state=req.body.state;
-  const country=req.body.country;
-  const city=req.body.city;
-  
-  
-  connection.query ( 'INSERT INTO Recolectores (name, state, country,city) VALUES (?, ?, ?,?)',[name, state, country,city],
-  (err,result)=>{
-   
-      if (err) {
-        console.log('Error al insertar datos:', err);
-      }else{res.send('Recolector registrado exitosamente');}
-      
+app.post("/regR", async (req, res) => {
+  const { name, state, country, city } = req.body;
 
+  try {
+    const query = 'INSERT INTO Recolectores (name, state, country, city) VALUES (?, ?, ?, ?)';
+    const values = [name, state, country, city];
+
+    const [result] = await connection.promise().query(query, values);
+    res.send('Recolector registrado exitosamente');
+  } catch (err) {
+    console.log('Error al insertar datos:', err);
+    res.status(500).send('Error al registrar recolector');
   }
-
-);
 });
+
 
 //registrar Planta
 
-app.post("/regP",(req,res)=>{
-  const scientific_name =req.body.scientific_name;
-  const common_name=req.body.common_name;
-  const family=req.body.family;
-  const genus=req.body.genus;
-  const species=req.body.species;
-  const description=req.body.description;
-  const habitat=req.body.habitat;
-  const location=req.body.location;
-  const image=req.body.image;
-  const collection_date=req.body.collection_date;
-  const recolector_id=req.body.recolector_id;
-  
-  
-  connection.query ( 'INSERT INTO Plantas (scientific_name, common_name, family,genus,species,description,habitat,location,image,collection_date,recolector_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-    [scientific_name, common_name, family,genus,species,description,habitat,location,image,collection_date,recolector_id],
-  (err,result)=>{
-   
-      if (err) {
-        console.log('Error al insertar datos:', err);
-      }else{res.send('Planta registrado exitosamente');}
-      
+app.post("/regP", async (req, res) => {
+  const {
+    scientific_name,
+    common_name,
+    family,
+    genus,
+    species,
+    description,
+    habitat,
+    location,
+    image,
+    collection_date,
+    recolector_id
+  } = req.body;
+
+  try {
+    const query = 'INSERT INTO Plantas (scientific_name, common_name, family, genus, species, description, habitat, location, image, collection_date, recolector_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const values = [scientific_name, common_name, family, genus, species, description, habitat, location, image, collection_date, recolector_id];
+
+    const [result] = await connection.promise().query(query, values);
+    res.send('Planta registrada exitosamente');
+  } catch (err) {
+    console.log('Error al insertar datos:', err);
+    res.status(500).send('Error al registrar planta');
   }
-);
 });
 
+
 //Actualizar planta
-app.post("/PlantasUp/:id", (req, res) => {
+app.post("/PlantasUp/:id", async (req, res) => {
   const { id } = req.params;
   const {
     scientific_name,
@@ -152,101 +160,102 @@ app.post("/PlantasUp/:id", (req, res) => {
     recolector_id
   } = req.body;
 
-  const query = `UPDATE Plantas SET scientific_name = ?,common_name = ?,family = ?, genus = ?,species = ?, description = ?,habitat = ?,
-    location = ?, image = ?,collection_date = ?,recolector_id = ? WHERE id = ? `;
+  const query = `UPDATE Plantas SET scientific_name = ?, common_name = ?, family = ?, genus = ?, species = ?, description = ?, habitat = ?, location = ?, image = ?, collection_date = ?, recolector_id = ? WHERE id = ?`;
 
-  connection.query(query, [scientific_name,common_name,family,genus,species,description, habitat,location, image,collection_date, recolector_id, id
-  ], (err, result) => {
-    if (err) {
-      console.log('Error al actualizar datos:', err);
-      res.status(500).send('Error al actualizar la planta');
-    } else {
-      res.send('Planta actualizada exitosamente');
-    }
-  });
+  try {
+    const [result] = await connection.promise().query(query, [scientific_name, common_name, family, genus, species, description, habitat, location, image, collection_date, recolector_id, id]);
+    res.send('Planta actualizada exitosamente');
+  } catch (err) {
+    console.log('Error al actualizar datos:', err);
+    res.status(500).send('Error al actualizar la planta');
+  }
 });
+
 
 //Consultar Recolectores
 
-
-app.get("/Recolectores",(req,res)=>{
-  
-  connection.query ( 'SELECT * FROM Recolectores ',
-  (err,result)=>{
-   
-      if (err) {
-        console.log(Err);
-      }else{
-        res.send(result);
-      }
-
-}
-);
+app.get('/Recolectores', async function(req, res, next) {
+  try {
+    const [rows] = await connection.query("SELECT * FROM Recolectores");
+    if (rows.length === 0) {
+      return res.status(204).json({ status: 204, message: "No items found" });
+    }
+    return res.status(200).json({ status: 200, data: rows });
+  } catch (err) {
+    return res.status(500).json({ status: 500, message: err.message });
+  }
 });
+
+
+
 
 //Consultar Plantas
 
-app.get("/Plantas",(req,res)=>{
-  
-  connection.query ( 'SELECT * FROM Plantas ',
-  (err,result)=>{
-   
-      if (err) {
-        console.log(Err);
-      }else{
-        res.send(result);
-      }
 
-}
-);
-});
-//Consultar plantas con id
-app.get("/Plantas/:id", (req, res) => {
-  const { id } = req.params; // Obtienes el ID de la ruta
-
-  connection.query('SELECT * FROM Plantas WHERE id = ?', [id], (err, result) => {
-    if (err) {
-      console.log('Error:', err);
-      res.status(500).send('Error al obtener la planta');
-    } else {
-      
-      if (result.length > 0) {
-        res.send(result[0]); 
-      } else {
-        res.status(404).send('Planta no encontrada'); 
-      }
+app.get('/Plantas', async function(req, res, next) {
+  try {
+    const [rows] = await connection.query("SELECT * FROM Plantas");
+    if (rows.length === 0) {
+      return res.status(204).json({ status: 204, message: "No items found" });
     }
-  });
+    return res.status(200).json({ status: 200, data: rows });
+  } catch (err) {
+    return res.status(500).json({ status: 500, message: err.message });
+  }
+});
+
+
+
+
+
+//Consultar plantas con id
+app.get("/Plantas/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await connection.promise().query('SELECT * FROM Plantas WHERE id = ?', [id]);
+    
+    if (result.length > 0) {
+      res.send(result[0]); 
+    } else {
+      res.status(404).send('Planta no encontrada'); 
+    }
+  } catch (err) {
+    console.log('Error:', err);
+    res.status(500).send('Error al obtener la planta');
+  }
 });
 
 //borrar plantas
 
-app.delete("/borrarPlanta/:id", (req, res) => {
-  const { id } = req.params; 
+app.delete("/borrarPlanta/:id", async (req, res) => {
+  const { id } = req.params;
 
-  connection.query('DELETE FROM Plantas WHERE id = ?', [id], (err, result) => {
-    if (err) {
-      console.log('Error al borrar la planta:', err);
-      res.status(500).send('Error al borrar la planta');
+  try {
+    const [result] = await connection.promise().query('DELETE FROM Plantas WHERE id = ?', [id]);
+    
+    if (result.affectedRows > 0) {
+      res.send('Planta borrada exitosamente');
     } else {
-      if (result.affectedRows > 0) {
-        res.send('Planta borrada exitosamente');
-      } else {
-        res.status(404).send('Planta no encontrada');
-      }
+      res.status(404).send('Planta no encontrada');
     }
-  });
+  } catch (err) {
+    console.log('Error al borrar la planta:', err);
+    res.status(500).send('Error al borrar la planta');
+  }
 });
 
 
+
 //consultar usuarios
+/*
 app.get("/Usuarios",(req,res)=>{
   
-  connection.query ( 'SELECT * FROM usuarios ',
+  connection.query ( 'SELECT * FROM Usuarios ',
   (err,result)=>{
    
       if (err) {
-        console.log(Err);
+        console.log(err);
       }else{
         res.send(result);
       }
@@ -254,6 +263,8 @@ app.get("/Usuarios",(req,res)=>{
 }
 );
 });
+
+*/
 
 /*
 connection.connect((err) => {
@@ -263,14 +274,14 @@ connection.connect((err) => {
   }
   console.log('Conexión a la base de datos MySQL establecida correctamente');
 });
-
-
-app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-});
-
-
 */
+
+
+
+
+  app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
+  });
 
 
 
