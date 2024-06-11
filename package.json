@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "conexion_mysql.js",
   "scripts": {
+    "dev": "nodemon conexion_mysql",
     "start": "node conexion_mysql.js"
   },
   "dependencies": {
@@ -10,8 +11,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "mysql2": "^3.10.0"
   },
   "author": "Diego",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
 }
