@@ -36,13 +36,12 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
-  res.send(database);
 });
 
 
 
 
-router.get('/Usuarios', async function(req, res, next) {
+app.get('/Usuarios', async function(req, res, next) {
   try {
     const [rows] = await connection.query("SELECT * FROM Usuarios");
     if (rows.length === 0) {
