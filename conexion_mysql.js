@@ -36,10 +36,11 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.send('Backend is running');
+  res.send(database);
 });
 
 
-/*
+
 
 router.get('/Usuarios', async function(req, res, next) {
   try {
@@ -53,7 +54,7 @@ router.get('/Usuarios', async function(req, res, next) {
   }
 });
 
-*/
+
 
 //Registrar usuarios
 app.post('/create', async (req, res) => {
