@@ -8,13 +8,14 @@ require('dotenv').config();
 var router = express.Router();
 const port =process.env.MYSQLPORT;
 
+
 const connection = mysql2.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT
- 
+  
 });
 
 
@@ -182,8 +183,10 @@ app.get('/Recolectores', async function(req, res, next) {
       return res.status(204).json({ status: 204, message: "No items found" });
     }
     return res.status(200).json({ status: 200, data: rows });
+    
   } catch (err) {
     return res.status(500).json({ status: 500, message: err.message });
+    
   }
 });
 
@@ -278,12 +281,12 @@ connection.connect((err) => {
 */
 
 
-
+/*
 
   app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
   });
-
+*/
 
 
 module.exports = connection;
