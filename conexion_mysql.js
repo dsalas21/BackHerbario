@@ -17,6 +17,7 @@ const connection = mysql2.createPool({
   user: user,
   password: password,
   database: database,
+  connectTimeout: 10000
   //port: process.env.MYSQLPORT
   
 });
