@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 });
 
 
-
+/*
 
 router.get('/Usuarios', async function(req, res, next) {
   try {
@@ -50,7 +50,7 @@ router.get('/Usuarios', async function(req, res, next) {
   }
 });
 
-
+*/
 
 //Registrar usuarios
 app.post('/create', async (req, res) => {
@@ -262,7 +262,7 @@ app.delete("/borrarPlanta/:id", async (req, res) => {
 
 
 //consultar usuarios
-/*
+
 app.get("/Usuarios",(req,res)=>{
   
   connection.query ( 'SELECT * FROM Usuarios ',
@@ -278,7 +278,7 @@ app.get("/Usuarios",(req,res)=>{
 );
 });
 
-*/
+
 
 /*
 connection.connect((err) => {
