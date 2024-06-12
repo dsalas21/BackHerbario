@@ -6,17 +6,17 @@ const cors= require('cors');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const router = express.Router();
-const port =46785;
+const port = process.env.PORT || 3001;
 const host= process.env.MYSQLHOST || 'localhost';
 const user= process.env.MYSQLUSER || 'root';
 const password= process.env.MYSQLPASSWORD ||'root';
 const database= process.env.MYSQLDATABASE ||'herbariobd';
 
 const connection = mysql2.createPool({
-  host: 'roundhouse.proxy.rlwy.net',
-  user: 'root',
-  password: 'dPLNXWMXwxFnffTPjiFNjjOVNgZbLQor',
-  database: 'railway',
+  host: host,
+  user: user,
+  password: password,
+  database: database,
   connectTimeout: 10000
   //port: process.env.MYSQLPORT
   
@@ -221,6 +221,7 @@ app.get('/Plantas', async function(req, res, next) {
     return res.status(500).json({ status: 500, message: err.message });
   }
 });
+
 
 
 
