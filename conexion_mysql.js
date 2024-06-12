@@ -5,8 +5,8 @@ const app = express();
 const cors= require('cors');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
-var router = express.Router();
-const port =process.env.MYSQLPORT;
+const router = express.Router();
+const port = process.env.PORT || 3001;
 
 
 const connection = mysql2.createPool({
@@ -14,7 +14,7 @@ const connection = mysql2.createPool({
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT
+  //port: process.env.MYSQLPORT
   
 });
 
