@@ -7,13 +7,16 @@ const bcrypt = require('bcrypt');
 require('dotenv').config();
 const router = express.Router();
 const port = process.env.PORT || 3001;
-
+const host= process.env.MYSQLHOST || 'localhost';
+const user= process.env.MYSQLUSER || 'root';
+const password= process.env.MYSQLPASSWORD ||'root';
+const database= process.env.MYSQLDATABASE ||'herbariobd';
 
 const connection = mysql2.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
+  host: host,
+  user: user,
+  password: password,
+  database: database,
   //port: process.env.MYSQLPORT
   
 });
