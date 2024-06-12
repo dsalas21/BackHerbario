@@ -6,11 +6,11 @@ const cors= require('cors');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const router = express.Router();
-const port = process.env.PORT || 46785;
-const host = process.env.DB_HOST || 'roundhouse.proxy.rlwy.net';
-const user = process.env.DB_USER || 'root';
-const password = process.env.DB_PASSWORD || 'dPLNXWMXwxFnffTPjiFNjjOVNgZbLQor';
-const database = process.env.DB_NAME || 'railway';
+const port = process.env.MYSQLPORT || 46785;
+const host = process.env.MYSQLHOST || 'roundhouse.proxy.rlwy.net';
+const user = process.env.MYSQLUSER || 'root';
+const password = process.env.MYSQLPASSWORD || 'dPLNXWMXwxFnffTPjiFNjjOVNgZbLQor';
+const database = process.env.MYSQLDATABASE || 'railway';
 
 const connection = mysql2.createPool({
   host: host,
