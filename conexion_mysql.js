@@ -292,6 +292,14 @@ connection.connect((err) => {
   console.log('Conexión a la base de datos MySQL establecida correctamente');
 });
 */
+app.get('/test-db-connection', async (req, res) => {
+  try {
+    const [rows] = await connection.query("SELECT 1");
+    res.status(200).json({ status: 200, message: 'Connection successful', data: rows });
+  } catch (err) {
+    res.status(500).json({ status: 500, message: 'Connection failed', error: err.message });
+  }
+});
 
 
 
