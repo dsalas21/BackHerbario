@@ -293,10 +293,11 @@ connection.connect((err) => {
 
 
 
-  app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
-  });
 
+// Listen on `port` and 0.0.0.0
+app.listen(port, "0.0.0.0", function () {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
+});
 
 
 module.exports = connection;
