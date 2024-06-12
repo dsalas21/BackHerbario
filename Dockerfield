@@ -1,0 +1,18 @@
+# Ejemplo simple de Dockerfile para una aplicación Node.js
+FROM node:22
+
+# Crear directorio de la aplicación
+WORKDIR /conexion_mysql
+
+# Instalar dependencias de la aplicación
+COPY package*.json ./
+RUN npm install
+
+# Copiar el código de la aplicación
+COPY . .
+
+# Exponer el puerto de la aplicación
+EXPOSE 3000
+
+# Comando para ejecutar la aplicación
+CMD [ "node", "conexion_mysql.js" ]
