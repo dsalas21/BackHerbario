@@ -25,12 +25,12 @@ const connection = mysql2.createPool({
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-
+/*
 app.use((req, res, next) => {
   console.log(`Request URL: ${req.url}, Method: ${req.method}`);
   next();
 });
-
+*/
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
